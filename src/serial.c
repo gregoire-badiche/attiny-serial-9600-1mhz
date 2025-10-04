@@ -1,5 +1,20 @@
-/**
- * Copyright (c) 2025 Grégoire Badiche
+/** 
+ * ATtiny serial (9600 bauds, 1MHz clock speed)
+ *  
+ * Copyright (C) 2025  Grégoire Badiche
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <avr/io.h>
@@ -7,9 +22,13 @@
 
 void serial_init(void)
 {
+#ifndef DISABLE_TX
     DDRB |= (1 << TX_PIN);
     PORTB |= (1 << TX_PIN);
+#endif
+#ifndef DISABLE_RX
     DDRB &= ~(1 << RX_PIN);
+#endif
 }
 
 #ifndef DISABLE_RX
@@ -72,13 +91,13 @@ char read()
     return c;
 }
 
-void recieve(volatile char *buff, int len)
+void recieve(char *buff, int len)
 {
     for (int i = 0; i < len; i++)
     {
         *buff = read();
 
-        if (*buff == '\n' || *buff == '\r')
+        if (*buff == '\n' || *buff == '\r' || *buff == '\0')
         {
             *buff = '\0';
             return;
@@ -88,11 +107,17 @@ void recieve(volatile char *buff, int len)
     }
 }
 
+void recieve_buff(char *buff, int len)
+{
+    for (int i = 0; i < len; i++)
+        *buff++ = read();
+}
+
 #endif
 
 #ifndef DISABLE_TX
 
-char write(char c)
+void write(char c)
 {
     asm volatile (
                                         /* f = 1000000 / 9600 = 104.17 */
@@ -110,7 +135,7 @@ char write(char c)
         "dec r18"               "\n\t"  /* 1 */
         "brne L%=activation"    "\n\t"  /* 2 */
         "ror %[c]"              "\n\t"  /* 1 -> 102 (101) */
-        "brcs L%=bit_high"      "\n\t"      /* 1 (not taken) -> 103 (102) */
+        "brcs L%=bit_high"      "\n\t"     /* 1 (not taken) -> 103 (102) */
         "nop"                   "\n\t"  /* 1 -> 104 (103) */
         "cbi %[port], %[pin_no]""\n\t"  /* 1 -> 1 */
         "rjmp L%=bit_end"       "\n\t"  /* 2 -> 3 */
@@ -140,7 +165,14 @@ char write(char c)
 
 void print(const char* str)
 {
-    while(*str) write(*str++);
+    while(*str)
+        write(*str++);
+}
+
+void println(const char* str)
+{
+    print(str);
+    print("\r\n");
 }
 
 #endif
