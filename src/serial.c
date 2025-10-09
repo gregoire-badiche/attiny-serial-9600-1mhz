@@ -93,18 +93,18 @@ char read()
 
 void recieve(char *buff, int len)
 {
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < len - 1; i++)
     {
-        *buff = read();
+        buff[i] = read();
 
-        if (*buff == '\n' || *buff == '\r' || *buff == '\0')
+        if (buff[i] == '\n' || buff[i] == '\r' || buff[i] == '\0')
         {
-            *buff = '\0';
+            buff[i] = '\0';
             return;
         }
-
-        buff++;
     }
+
+    buff[len - 1] = '\0';
 }
 
 void recieve_buff(char *buff, int len)
