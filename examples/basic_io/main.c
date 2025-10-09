@@ -12,7 +12,7 @@ int main(void)
 
     for (;;)
     {
-        println("What is your name?\r\n");
+        println("What is your name?");
 
         recieve(input, 32);
 

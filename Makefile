@@ -8,7 +8,8 @@
 MCU        = attiny85
 F_CPU      = 1000000UL
 PROGRAMMER = avrisp
-PORT       = usb
+PORT       = /dev/ttyACM0
+BAUD	   = 19200
 
 CC      = avr-gcc
 OBJCOPY = avr-objcopy
@@ -33,7 +34,7 @@ $(EXAMPLES):
 # Upload targets
 upload-%: %
 	@echo "Uploading $< to $(MCU)..."
-	avrdude -c $(PROGRAMMER) -p $(MCU) -P $(PORT) -U flash:w:$<.hex:i
+	avrdude -c $(PROGRAMMER) -p $(MCU) -P $(PORT) -b $(BAUD) -U flash:w:$<.hex:i
 
 # Clean
 clean:
