@@ -156,7 +156,7 @@ void write(char c)
         "dec r18"               "\n\t"  /* 1 */
         "brne L%=bit_stop2"     "\n\t"  /* 2 */
         "sei"                   "\n\t"  /* 1 -> 104 */
-        :   [c] "+r" (c),
+        :   [c] "+r" (c)
         :   [pin_no] "I" (TX_PIN),
             [port] "I" (_SFR_IO_ADDR(PORTB))
         :   "r18", "r19", "cc"
